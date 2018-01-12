@@ -2,7 +2,9 @@
 ;; 2018 - iomonad <me@trosa.io>
 
 ;; (ql:quickload "lispbuilder-sdl")
-(ql:quickload "unix-opts")
+(ql:quickload "unix-opts"
+			  :silent t)
 
 (defun main ()
-  "Application entry point")
+  (format t "Hello world.~%")
+  (sb-ext:exit))
