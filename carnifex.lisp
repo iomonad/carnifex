@@ -3,7 +3,7 @@
 
 ;; (ql:quickload "lispbuilder-sdl")
 (ql:quickload "unix-opts"
-			  :silent t)
+  :silent t)
 
 (defun main ()
   (format t "Hello world.~%")
