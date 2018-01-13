@@ -1,4 +1,4 @@
-;; Carnifexx.lisp
+;; carnifex.lisp
 ;; 2018 - iomonad <me@trosa.io>
 
 (ql:quickload '(:lispbuilder-sdl)
@@ -34,7 +34,12 @@
       (setf (sdl:frame-rate) frate)
       (sdl:clear-display
        (sdl:color :r 30 :g 30 :b  57))
-      (sleep 10))))
+	  (sdl:with-events ()
+		(:quit-event () t)
+		(:key-down-event ()
+		  (when (or (sdl:key-down-p :sdl-key-q)
+					(sdl:key-down-p :sdl-key-escape))
+			(sdl:push-quit-event)))))))
 
 (defun main ()
   (let* ((al (len *posix-argv*)))
