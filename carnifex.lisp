@@ -6,14 +6,32 @@
 (ql:quickload '(:unix-opts)
   :silent t)
 
+(defstruct display wwin hwin frate)
+(defparameter *display*
+  (make-display :wwin 800
+				:hwin 800
+				:frate 60))
+
 (defun len (list)
   (if list
 	  (1+ (len (cdr list)))
 	0))
 
 (defun usage (&key pname)
-  (format t "usage: ~s <width> <height>~%"
-		  pname))
+  (lambda ()
+	(format t "usage: ~s <width> <height>~%"
+			pname)
+	(sb-ext:exit)))
+
+(defun conway-automaton ()
+  (sdl:with-init ()
+    (let ((wwin (display-wwin *display*))
+		  (hwin (display-hwin *display*))
+		  (frate (display-frate *display*)))
+	  (sdl:window wwin hwin
+				  :title-caption "Conway Automaton"
+				  :icon-caption "Conway Automaton")
+	  (setf (sdl:frame-rate) frate))))
 
 (defun main ()
   (let* ((al (len *posix-argv*)))
@@ -24,4 +42,5 @@
 		 (height (nth 2 *posix-argv*)))
 	(format t "Width: ~f, Height: ~f~%"
 			width height))
+  (conway-automaton)
   (sb-ext:exit))
