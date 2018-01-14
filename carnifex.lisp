@@ -23,6 +23,9 @@
             pname)
     (sb-ext:exit)))
 
+(defun life-loop ()
+  (nil))
+
 (defun conway-automaton ()
   (sdl:with-init ()
     (let ((wwin (display-wwin *display*))
