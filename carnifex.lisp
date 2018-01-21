@@ -24,7 +24,7 @@
     (sb-ext:exit)))
 
 (defun life-loop ()
-  (nil))
+  (life-loop))
 
 (defun conway-automaton ()
   (sdl:with-init ()
