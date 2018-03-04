@@ -1,4 +1,5 @@
 ;; carnifex.lisp
+;; A Conway’s automaton.
 ;; 2018 - iomonad <me@trosa.io>
 
 (ql:quickload '(:lispbuilder-sdl)
@@ -6,16 +7,8 @@
 (ql:quickload '(:unix-opts)
               :silent t)
 
-(defstruct display wwin hwin frate)
-(defparameter *display*
-  (make-display :wwin 800
-                :hwin 800
-                :frate 60))
-
-(defun len (list)
-  (if list
-      (1+ (len (cdr list)))
-      0))
+(load "utils.lisp")
+(load "data.lisp")
 
 (defun usage (&key pname)
   (lambda ()

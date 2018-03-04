@@ -1,2 +1,5 @@
 #!/bin/bash
-sbcl --noinform --disable-debugger --load carnifex.lisp --eval "(main)" $@
+sbcl --noinform \
+	 --disable-debugger \
+	 --load carnifex.lisp \
+	 --eval "(sb-int:with-float-traps-masked (:invalid :inexact :overflow) (main))" $@
