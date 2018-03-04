@@ -2,10 +2,29 @@
 ;; A Conway’s automaton.
 ;; 2018 - iomonad <me@trosa.io>
 
-(defun life-loop ()
-  (life-loop))
+(defparameter *matrix* nil) ;; mutable container
+
+(defun key-handler (key)
+  "Key  handler"
+  (if (sdl:key= key :sdl-key-escape)
+	  (sdl:push-quit-event)))
+
+(defun initalise-matrice ()
+  "Generate matrice"
+  (setq *matrix* (make-array (list *av1* *av2*))))
+
+(defun boucle-cyclique ()
+  (conway-loop)
+  (sdl:update-display)
+  (sdl:clear-display
+   (sdl:color
+    :r 127
+    :g 29
+	:b 127)))
 
 (defun conway-automaton ()
+  "Automaton main entry point"
+  (initalise-matrice)
   (sdl:with-init ()
     (let ((wwin (display-wwin *display*))
           (hwin (display-hwin *display*))
@@ -17,8 +36,9 @@
       (sdl:clear-display
        (sdl:color :r 30 :g 30 :b  57))
 	  (sdl:with-events ()
-					   (:quit-event () t)
-		(:key-down-event ()
-		  (when (or (sdl:key-down-p :sdl-key-q)
-					(sdl:key-down-p :sdl-key-escape))
-			(sdl:push-quit-event)))))))
+	    (:quit-event () t)
+		(:key-down-event
+		 (:key k) (key-handler k))
+		(boucle-cyclique)))))
+
+(declaim (sb-ext:muffle-conditions cl:warning))
