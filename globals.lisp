@@ -7,6 +7,8 @@
 (defparameter width 1000)
 (defparameter height 1000)
 (defparameter tile_size 15)
+(defparameter *invert* 1)
+(defparameter *trace* 0)
 (defparameter xi 0)                     ; Matrix width
 (defparameter yi 0)                     ; Matrix height
 (defparameter last_x 0)

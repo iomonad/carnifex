@@ -64,10 +64,23 @@ optional arguments:
            (list yi xi) :initial-element
            defa))))
 
+(defun parse-arguments (&key argv)
+  "Retrieve options"
+  (map 'list
+       #'(lambda (x)
+           (when (or (string-equal "-i" x)
+                     (string-equal "--invert" x))
+             (setq *invert* 0))
+           (when (or (string-equal "-t" x)
+                     (string-equal "--traces" x))
+             (setq *trace* 1)))
+       argv))
+
 (defun main ()
   (init :pname
         (car sb-ext:*posix-argv*))
   (sanitize-input :argv *posix-argv*)
+  (parse-arguments :argv *posix-argv*)
   (sb-ext:exit :code 0))
 
 (sb-int:with-float-traps-masked
