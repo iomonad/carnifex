@@ -1,5 +1,8 @@
 #!/bin/bash
+# iomonad - <me@trosa.io>
+
 sbcl --noinform \
 	 --disable-debugger \
 	 --load carnifex.lisp \
-	 --eval "(sb-int:with-float-traps-masked (:invalid :inexact :overflow) (main))" $@
+	 --eval "(sb-int:with-float-traps-masked (:invalid :inexact :overflow) (main))" \
+     $@
