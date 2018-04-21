@@ -8,6 +8,23 @@
 (ql:quickload '(:unix-opts)
               :silent t)
 
+(defun sanitize-input (&key argv)
+  "Check if input arguments are correct"
+  (let* ((y (parse-integer
+            (nth 1 argv)))
+        (x (parse-integer
+            (nth 2 argv))))
+    (if (or (< 1000 y)
+            (< 1000 x))
+        (lambda ()
+          (format t "Les dimensions ne doivent pas exceder une longeur de 1000~%")
+          (exit)))
+    (if (or (> 0 y)
+            (> 0 x))
+        (lambda ()
+          (format t "Les valeurs doivent etre positives~%")
+          (exit)))))
+
 (defun init (&key pname)
   "Check arguments and display usage when options is incorrect"
     (let ((banner "usage: ~s <width:int> <height:int> [-h --help -i --invert -t --traces]
@@ -28,7 +45,8 @@ optional arguments:
 
 (defun main ()
   (init :pname
-    (car sb-ext:*posix-argv*))
+        (car sb-ext:*posix-argv*))
+  (sanitize-input :argv *posix-argv*)
   (exit))
 
 (sb-int:with-float-traps-masked
