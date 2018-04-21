@@ -11,43 +11,43 @@
 (defun sanitize-input (&key argv)
   "Check if input arguments are correct"
   (let* ((y (parse-integer
-            (nth 1 argv)))
-        (x (parse-integer
-            (nth 2 argv))))
-    (if (or (< 1000 y)
-            (< 1000 x))
-        (lambda ()
-          (format t "Les dimensions ne doivent pas exceder une longeur de 1000~%")
-          (exit)))
-    (if (or (> 0 y)
-            (> 0 x))
-        (lambda ()
-          (format t "Les valeurs doivent etre positives~%")
-          (exit)))))
+             (nth 1 argv)))
+         (x (parse-integer
+             (nth 2 argv))))
+    (when (or (< 1000 y)
+              (< 1000 x))
+      (lambda ()
+        (format t "Les dimensions ne doivent pas exceder une longeur de 1000~%")
+        (sb-ext:exit :code 1)))
+    (when (or (> 0 y)
+              (> 0 x))
+      (lambda ()
+        (format t "Les valeurs doivent etre positives~%")
+        (sb-ext:exit :code 1)))))
 
 (defun init (&key pname)
   "Check arguments and display usage when options is incorrect"
-    (let ((banner "usage: ~s <width:int> <height:int> [-h --help -i --invert -t --traces]
+  (let ((banner "usage: ~s <width:int> <height:int> [-h --help -i --invert -t --traces]
 positional arguments:
   width                 width of the grid
   height                height of the grid
 optional arguments:
   -h, --help            show this help message and exit~%"))
-      (if (or (loop for arg in *posix-argv*
+    (when (or (loop for arg in *posix-argv*
                     when (or (string-equal "-h" arg)
                              (string-equal "--help" arg))
                     return t)
               (not (< 2 (length *posix-argv*))))
-          (progn
-            (format t banner pname)
-            (sb-ext:exit))))
-    'continue)
+      (progn
+        (format t banner pname)
+        (sb-ext:exit :code 1))))
+  'continue)
 
 (defun main ()
   (init :pname
         (car sb-ext:*posix-argv*))
   (sanitize-input :argv *posix-argv*)
-  (exit))
+  (sb-ext:exit :code 0))
 
 (sb-int:with-float-traps-masked
  (:invalid :inexact :overflow) (main))
