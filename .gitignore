@@ -1,0 +1,15 @@
+*.fas
+*.lib
+*.fasl
+*.a
+*.o
+*.*fasl
+*.*fsl
+*~
+*.swp
+\#*#
+configure
+config.log
+config.status
+autom4te.cache
+Makefile
