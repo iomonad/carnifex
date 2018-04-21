@@ -24,3 +24,5 @@
 (defparameter last_time 0)
 (defparameter arr nil)
 (defparameter next_generation nil)
+(defparameter *white* sdl:*white*)
+(defparameter *red* (sdl:color :r 137 :g 137 :b 137))

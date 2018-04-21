@@ -10,6 +10,8 @@
               :silent t)
 (load "globals.lisp")
 
+;; ----- input -----
+
 (defun sanitize-input (&key argv)
   "Check if input arguments are correct"
   (let* ((y (parse-integer
@@ -42,12 +44,13 @@ optional arguments:
                              (string-equal "--help" arg))
                     return t)
               (not (< 2 (length *posix-argv*))))
-      (progn
+      (lambda ()
         (format t banner pname)
         (sb-ext:exit :code 1))))
   'continue)
 
 (defun init-globals ()
+  "Initialise constants"
   (let ((d 1000)
         (defa 0))
     (setq width d)
@@ -67,14 +70,124 @@ optional arguments:
 (defun parse-arguments (&key argv)
   "Retrieve options"
   (map 'list
-       #'(lambda (x)
-           (when (or (string-equal "-i" x)
-                     (string-equal "--invert" x))
+       #'(lambda (a)
+           (when (or (string-equal "-i" a)
+                     (string-equal "--invert" a))
              (setq *invert* 0))
-           (when (or (string-equal "-t" x)
-                     (string-equal "--traces" x))
+           (when (or (string-equal "-t" a)
+                     (string-equal "--traces" a))
              (setq *trace* 1)))
        argv))
+
+;; ----- algo -----
+
+(defun get-current-cell (i j)
+  "Retrieve cell in matrice"
+  (aref arr i j))
+
+(defun display-trace ()
+  "Predicate for trace support"
+  (if (EQUAL *trace* 1) 2
+    0))
+
+(defun get-next-cell (i j)
+  "Retrieve cell in next-level matrice"
+  (aref next_generation i j))
+
+(defun is-alive (i j)
+  "Check if cell is alive"
+  (EQUAL (get-current-cell i j)
+         1))
+
+(defun randomize ()
+  "Fill matrice"
+  (dotimes (i yi)
+    (dotimes (j xi)
+      (setf (aref arr i j)
+            (random 2))))
+  arr)
+
+(defun is-nearby (i j)
+  "Neighbors predicate"
+  (when (AND (> i -1)
+           (< i yi)
+           (> j -1)
+           (< j xi))
+      (if (equal (get-current-cell i j) 1) 1
+        0)
+      0))
+
+(defun get-neighbor (i j)
+  "Retrieve neighbors"
+  (+ (is-nearby (+ i 1) j)
+     (is-nearby (- i 1) j)
+     (is-nearby i (+ j 1))
+     (is-nearby i (- j 1))
+     (is-nearby (- i 1) (- j 1))
+     (is-nearby (+ i 1) (+ j 1))
+     (is-nearby (- i 1) (+ j 1))
+     (is-nearby (+ i 1) (- j 1))))
+
+(defun determine-neighbor ()
+  "Calculate neighbors"
+  (dotimes (i yi)
+    (dotimes (j xi)
+      (setf (aref next_generation i j)
+            (get-neighbor i j))))
+  next_generation)
+
+;; ---- Conways Rules -----
+
+(defun rule1 (i j)
+  (if (NOT(is-alive i j))
+      (get-current-cell i j)
+    (if (NOT(< (get-next-cell i j) 2))
+        1
+      (display-trace))))
+
+(defun rule2 (i j)
+  (if (NOT (is-alive i j))
+      (get-current-cell i j)
+    (if (OR (EQUAL (get-next-cell i j) 2)
+            (EQUAL (get-next-cell i j) 3))
+        1
+      (display-trace))))
+
+(defun rule3 (i j)
+  (if (NOT(is-alive i j))
+      (get-current-cell i j)
+    (if (NOT (> (get-next-cell i j) 3))
+        1
+      (display-trace))))
+
+(defun rule4 (i j)
+  (if (is-alive i j)
+      (get-current-cell i j)
+    (if (EQUAL (get-next-cell i j) 3)
+        1
+      (get-current-cell i j))))
+
+;; ---- Post Rules ----
+
+(defun alter-life ()
+  "Calculate the life of the rule"
+  (dotimes (i yi)
+    (dotimes (j xi)
+      (setf (aref arr i j)
+            (rule1 i j))
+      (setf (aref arr i j)
+            (rule3 i j))
+      (setf (aref arr i j)
+            (rule4 i j))))
+  arr)
+
+(defun conway-automaton ()
+  "Algorithm entry point"
+  (setq next_generation                 ; Get next generation
+        (determine-neighbor))
+  (setq arr (alter-life)))                ; Retrieve cursor
+
+;; ----- Main -----
 
 (defun main ()
   (init :pname
