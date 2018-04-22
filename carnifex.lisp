@@ -10,7 +10,7 @@
               :silent t)
 (load "globals.lisp")
 
-;; ----- input -----
+;; Input
 
 (defun sanitize-input (&key argv)
   "Check if input arguments are correct"
@@ -79,7 +79,7 @@ optional arguments:
              (setq *trace* 1)))
        argv))
 
-;; ----- algo -----
+;; Algorithm
 
 (defun get-current-cell (i j)
   "Retrieve cell in matrice"
@@ -136,7 +136,7 @@ optional arguments:
             (get-neighbor i j))))
   next_generation)
 
-;; ---- Conways Rules -----
+;; Conways Rules
 
 (defun rule1 (i j)
   (if (NOT(is-alive i j))
@@ -167,7 +167,7 @@ optional arguments:
         1
       (get-current-cell i j))))
 
-;; ---- Post Rules ----
+;; Post Rules
 
 (defun alter-life ()
   "Calculate the life of the rule"
@@ -187,13 +187,102 @@ optional arguments:
         (determine-neighbor))
   (setq arr (alter-life)))                ; Retrieve cursor
 
-;; ----- Main -----
+;; Graphic
+
+(defun print-box (xn yn size color)
+  "Display box in the sdl scene"
+  (sdl:draw-box (sdl:rectangle-from-midpoint-*
+                 (+ xn (floor size 2))
+                 (+ yn (floor size 2)) size size)
+                :color color))
+
+(defun swap-color ()
+  "Predicate to determine colors from params"
+  (if (EQUAL *invert* 1) 1 0))
+
+(defun print-gui-board (arr x y tile_size)
+  "Display board from references"
+  (sdl:clear-display sdl:*black*)
+  (dotimes (y2 y)
+    (dotimes (x2 x)
+      (if (eq (eq (aref arr y2 x2) (swap-color)) T)
+          (print-box (+ 1 (* x2 tile_size ) move_x)
+                     (+ 1 (* y2 tile_size) move_y)
+                     (- tile_size (floor tile_size 10)) *white*))
+      (if (eq (aref arr y2 x2) 2)
+          (print-box (+ 1 (* x2 tile_size) move_x)
+                     (+ 1 (* y2 tile_size) move_y)
+                     (- tile_size (floor tile_size 10)) *red*))
+      ))
+  (sdl:update-display))
+
+(defun zoom ()
+  "Zoom in the global scope"
+  (when (< tile_size 400)
+    (lambda()
+      (setf tile_size (+ tile_size zoom_dec_speed))
+      (setf move_x (- move_x 50))
+      (setf move_y (- move_y 50)))))
+
+(defun dezoom ()
+  "Un-zoom the goba scope"
+  (when (> tile_size zoom_dec_speed)
+    (lambda ()
+      (setf tile_size (- tile_size zoom_dec_speed))
+      (setf move_x (+ move_x 50))
+      (setf move_y (+ move_y 50)))))
+
+(defun manage-speed (arg)
+  "Function helper to manage game speed"
+  (if (eq arg T)
+      (lambda ()
+        (if (>= speed_game 20)
+            (setf speed_game
+                  (- speed_game change_speed_game))))
+    (lambda ()
+      (if (<= speed_game 100)
+          (setf speed_game(+ speed_game
+                             change_speed_game))))))
+
+;; Keybinds
+
+
+(defun keybind-callback-handler (key)
+  "Handle keybinds with severals callbacks"
+  (if (sdl:key= key :sdl-key-escape)
+      (sdl:push-quit-event))
+  (if (or (sdl:key= key :sdl-key-left) (sdl:key= key :sdl-key-a))
+      (setf move_x (+ move_x move_speed)))
+  (if (or (sdl:key= key :sdl-key-right) (sdl:key= key :sdl-key-d))
+      (setf move_x (- move_x move_speed)))
+  (if (or (sdl:key= key :sdl-key-up) (sdl:key= key :sdl-key-w))
+      (setf move_y (+ move_y move_speed)))
+  (if (or (sdl:key= key :sdl-key-down) (sdl:key= key :sdl-key-s))
+      (setf move_y (- move_y move_speed)))
+  (if (sdl:key= key :sdl-key-period)
+      (manage-speed T))
+  (if (sdl:key= key :sdl-key-comma)
+      (manage-speed nil))
+  (if (or (sdl:key= key :sdl-key-q) (sdl:key= key :sdl-key-kp-minus))
+      (dezoom))
+  (if (or (sdl:key= key :sdl-key-e) (sdl:key= key :sdl-key-kp-plus))
+      (zoom))
+  (if (or (sdl:key= key :sdl-key-r))
+      (setq arr (make-array (list yi xi) :initial-element 0)))
+  (if (or (sdl:key= key :sdl-key-p) (sdl:key= key :sdl-key-space))
+      (if (= pause 0)
+          (setf pause 1)
+        (setf pause 0)))
+  (print-gui-board arr xi yi tile_size))
+
+;; Main
 
 (defun main ()
-  (init :pname
-        (car sb-ext:*posix-argv*))
-  (sanitize-input :argv *posix-argv*)
-  (parse-arguments :argv *posix-argv*)
+  (when (= 2 (length *posix-argv*))
+    (init :pname
+          (car sb-ext:*posix-argv*))
+    (sanitize-input :argv *posix-argv*)
+    (parse-arguments :argv *posix-argv*))
   (sb-ext:exit :code 0))
 
 (sb-int:with-float-traps-masked
