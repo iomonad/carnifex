@@ -10,6 +10,21 @@
               :silent t)
 (load "globals.lisp")
 
+(defmacro def-collection (&rest field-defs)
+  (let ((def-collection (make-def-collection)))
+    `(progn (loop for x in ',field-defs
+                  do (progn`
+                       (add-def ,def-collection (car x)
+                                (let ((definition (first (cdr x))))
+                                  (if (or (consp definition)
+                                          (symbolp definition))
+                                      (eval definition)
+                                    definition)))
+                       (setf (fields ,def-collection)
+                             (cons (car x)
+                                   (fields ,def-collection)))))
+            ,def-collection)))
+
 ;; Input
 
 (defun sanitize-input (&key argv)
@@ -51,8 +66,7 @@ optional arguments:
 
 (defun init-globals ()
   "Initialise constants"
-  (let ((d 1000)
-        (defa 0))
+  (let ((d 1000))
     (setq width d)
     (setq height d)
     (setq zoom_dec_speed 2)
@@ -60,12 +74,10 @@ optional arguments:
     (setq change_speed_game 5)
     (setq arr
           (make-array
-           (list yi xi) :initial-element
-           defa))
+           (list yi xi) :initial-element 0))
     (setq next_generation
           (make-array
-           (list yi xi) :initial-element
-           defa))))
+           (list yi xi) :initial-element 0))))
 
 (defun parse-arguments (&key argv)
   "Retrieve options"
@@ -200,9 +212,15 @@ optional arguments:
   "Predicate to determine colors from params"
   (if (EQUAL *invert* 1) 1 0))
 
+(defun debug-sdl-board (arr x y)
+  (format t "New board: ~d ~d with objects: ~%"
+          x y)
+  (print-object arr))
+
 (defun print-sdl-board (arr x y tile_size)
   "Display board from references"
   (sdl:clear-display sdl:*black*)
+  (debug-sdl-board arr x y)
   (dotimes (y2 y)
     (dotimes (x2 x)
       (if (eq (eq (aref arr y2 x2) (swap-color)) T)
@@ -369,6 +387,7 @@ optional arguments:
 (defun main ()
   (init :pname
         (car sb-ext:*posix-argv*))
+  (init-globals)
   (sanitize-input :argv *posix-argv*)
   (parse-arguments :argv *posix-argv*)
   (automaton-kernel)                 ; Run automaton
