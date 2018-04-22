@@ -272,7 +272,8 @@ optional arguments:
       (zoom))
   (if (or (sdl:key= key :sdl-key-r))
       (setq arr (make-array (list yi xi) :initial-element 0)))
-  (if (or (sdl:key= key :sdl-key-p) (sdl:key= key :sdl-key-space))
+  (if (or (sdl:key= key :sdl-key-p)
+          (sdl:key= key :sdl-key-space))
       (if (= pause 0)
           (setf pause 1)
         (setf pause 0)))
@@ -283,16 +284,16 @@ optional arguments:
 (defun mouse-callback-handler ()
   "Handle mouse events "
   (if (sdl:mouse-left-p)
-      (lambda ()
+      (progn
         (if (or (sdl:key-down-p :sdl-key-lctrl)
                 (sdl:key-down-p :sdl-key-rctrl))
-            (lambda ()
+            (progn
               (if (and (eq last_x 0)
                        (eq last_y 0))
-                  (lambda ()
+                  (progn
                     (setf last_x (sdl:mouse-x))
                     (setf last_y (sdl:mouse-y)))
-                (lambda ()
+                (progn
                   (let*
                       ((x_act (sdl:mouse-x))
                        (y_act (sdl:mouse-y)))
@@ -300,22 +301,22 @@ optional arguments:
                     (setf move_y (+ move_y (- y_act last_y)))
                     (setf last_x x_act)
                     (setf last_y y_act)))))
-          (let* ((i_tab (floor (- (sdl:mouse-y) move_y)
+          (let ((i_tab (floor (- (sdl:mouse-y) move_y)
                                tile_size))
                  (j_tab (floor (- (sdl:mouse-x) move_x)
                                tile_size)))
-            (when (eq (and (>= i_tab 0)
+            (if (eq (and (>= i_tab 0)
                            (< i_tab yi) ; Global y
                            (>= j_tab 0)
                            (< j_tab xi)) T) ;Global x
               (setf (aref arr i_tab j_tab) 1))))))
   (if (sdl:mouse-right-p)
-      (let*
+      (let
           ((i_tab (floor (- (sdl:mouse-y) move_y)
                          tile_size))
            (j_tab (floor (- (sdl:mouse-x) move_x)
                          tile_size)))
-        (when (eq (and (>= i_tab 0)
+        (if (eq (and (>= i_tab 0)
                        (< i_tab yi)     ; Global y
                        (>= j_tab 0)
                        (< j_tab xi)) T) ; Global x
