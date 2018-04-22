@@ -71,6 +71,9 @@ optional arguments:
            (when (or (string-equal "-i" a)
                      (string-equal "--invert" a))
              (setq *invert* 0))
+           (when (or (string-equal "-d" a)
+                     (string-equal "--debug" a))
+             (setq *debug* 1))
            (when (or (string-equal "-t" a)
                      (string-equal "--traces" a))
              (setq *trace* 1)))
@@ -197,16 +200,15 @@ optional arguments:
   "Predicate to determine colors from params"
   (if (EQUAL *invert* 1) 1 0))
 
-(defun debug-sdl-board (arr x y)
-  (format t "New board: ~d ~d with objects: ~%"
-          x y)
-                                        ;(print-object arr)
-  )
+(defun debug-sdl-board (arr)
+  (when (EQUAL 1 *debug*)
+    (format t "[*] speed:~d - cur:~d with objects: ~% ~s ~%"
+            speed_game cur_time arr)))
 
 (defun print-sdl-board (arr x y tile_size)
   "Display board from references"
   (sdl:clear-display sdl:*black*)
-  ;(debug-sdl-board arr x y)
+  (debug-sdl-board arr)
   (dotimes (y2 y)
     (dotimes (x2 x)
       (if (eq (eq (aref arr y2 x2) (swap-color)) T)
@@ -245,8 +247,8 @@ optional arguments:
                   (- speed_game change_speed_game))))
     (lambda ()
       (if (<= speed_game 100)
-          (setf speed_game(+ speed_game
-                             change_speed_game))))))
+          (setf speed_game (+ speed_game
+                              change_speed_game))))))
 
 ;; Keybinds
 

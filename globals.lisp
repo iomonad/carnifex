@@ -9,6 +9,7 @@
 (defparameter tile_size 15)
 (defparameter *invert* 1)
 (defparameter *trace* 0)
+(defparameter *debug* 0)
 (defparameter xi 0)                     ; Matrix width
 (defparameter yi 0)                     ; Matrix height
 (defparameter last_x 0)
