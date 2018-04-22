@@ -110,12 +110,12 @@ optional arguments:
 (defun is-nearby (i j)
   "Neighbors predicate"
   (when (AND (> i -1)
-           (< i yi)
-           (> j -1)
-           (< j xi))
-      (if (equal (get-current-cell i j) 1) 1
-        0)
-      0))
+             (< i yi)
+             (> j -1)
+             (< j xi))
+    (if (equal (get-current-cell i j) 1) 1
+      0)
+    0))
 
 (defun get-neighbor (i j)
   "Retrieve neighbors"
@@ -200,7 +200,7 @@ optional arguments:
   "Predicate to determine colors from params"
   (if (EQUAL *invert* 1) 1 0))
 
-(defun print-gui-board (arr x y tile_size)
+(defun print-sdl-board (arr x y tile_size)
   "Display board from references"
   (sdl:clear-display sdl:*black*)
   (dotimes (y2 y)
@@ -246,7 +246,6 @@ optional arguments:
 
 ;; Keybinds
 
-
 (defun keybind-callback-handler (key)
   "Handle keybinds with severals callbacks"
   (if (sdl:key= key :sdl-key-escape)
@@ -273,7 +272,52 @@ optional arguments:
       (if (= pause 0)
           (setf pause 1)
         (setf pause 0)))
-  (print-gui-board arr xi yi tile_size))
+  (print-sdl-board arr xi yi tile_size)) ; Recompute board
+
+;; Mouse events
+
+(defun mouse-callback-handler ()
+  "Handle mouse events "
+  (if (sdl:mouse-left-p)
+      (lambda ()
+        (if (or (sdl:key-down-p :sdl-key-lctrl)
+                (sdl:key-down-p :sdl-key-rctrl))
+            (lambda ()
+              (if (and (eq last_x 0)
+                       (eq last_y 0))
+                  (lambda ()
+                    (setf last_x (sdl:mouse-x))
+                    (setf last_y (sdl:mouse-y)))
+                (lambda ()
+                  (let*
+                      ((x_act (sdl:mouse-x))
+                       (y_act (sdl:mouse-y)))
+                    (setf move_x (+ move_x (- x_act last_x)))
+                    (setf move_y (+ move_y (- y_act last_y)))
+                    (setf last_x x_act)
+                    (setf last_y y_act)))))
+          (let* ((i_tab (floor (- (sdl:mouse-y) move_y)
+                               tile_size))
+                 (j_tab (floor (- (sdl:mouse-x) move_x)
+                               tile_size)))
+            (when (eq (and (>= i_tab 0)
+                           (< i_tab yi) ; Global y
+                           (>= j_tab 0)
+                           (< j_tab xi)) T) ;Global x
+              (setf (aref arr i_tab j_tab) 1))))))
+  (if (sdl:mouse-right-p)
+      (let*
+          ((i_tab (floor (- (sdl:mouse-y) move_y)
+                         tile_size))
+           (j_tab (floor (- (sdl:mouse-x) move_x)
+                         tile_size)))
+        (when (eq (and (>= i_tab 0)
+                       (< i_tab yi)     ; Global y
+                       (>= j_tab 0)
+                       (< j_tab xi)) T) ; Global x
+          (setf (aref arr i_tab j_tab)
+                0))))
+  (print-sdl-board arr xi yi tile_size)) ; Recompute board
 
 ;; Main
 
