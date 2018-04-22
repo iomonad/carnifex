@@ -319,14 +319,59 @@ optional arguments:
                 0))))
   (print-sdl-board arr xi yi tile_size)) ; Recompute board
 
+;; Entry point
+
+(defun automaton-kernel ()
+  "Entrypoint automaton loop"
+  (sdl:with-init ()
+    (sdl:window width height :title-caption "Carnifex")
+    (setf (sdl:frame-rate) 60)
+    (sdl:update-display)
+    (sdl:enable-key-repeat nil nil)
+    (sdl:with-events ()
+      (:quit-event () t)
+      (:video-expose-event ()
+        (sdl:update-display))
+      (:mouse-button-up-event
+       (:button button)
+       (if (= button 4) ; When down
+           (if (or (sdl:key-down-p :sdl-key-lshift)
+                   (sdl:key-down-p :sdl-key-rshift))
+               (manage-speed nil) ; shifted
+             (dezoom)))
+       (if (= button 5) ; When up
+           (if (or (sdl:key-down-p :sdl-key-lshift)
+                   (sdl:key-down-p :sdl-key-rshift))
+               (manage-speed t) ; shifted
+             (zoom)))
+       (if (= button 1)
+           (lambda ()
+             (setf last_x 0)
+             (setf last_y 0))))
+      (:key-down-event (:key key)
+        (keybind-callback-handler key))
+      (:idle ()
+        (mouse-callback-handler)
+        (if (eq (eq pause 0) T)
+            (lambda ()
+              (setf cur_time (get-internal-run-time))
+              (let* ((time_wait (- last_time
+                                  (- cur_time speed_game))))
+                (if (> time_wait 0)
+                    (sleep (/ time_wait
+                              100))))
+              (conway-automaton) ; This is the meat
+              (setf last_time
+                    cur_time)))))))
+
 ;; Main
 
 (defun main ()
-  (when (= 2 (length *posix-argv*))
-    (init :pname
-          (car sb-ext:*posix-argv*))
-    (sanitize-input :argv *posix-argv*)
-    (parse-arguments :argv *posix-argv*))
+  (init :pname
+        (car sb-ext:*posix-argv*))
+  (sanitize-input :argv *posix-argv*)
+  (parse-arguments :argv *posix-argv*)
+  (automaton-kernel)                 ; Run automaton
   (sb-ext:exit :code 0))
 
 (sb-int:with-float-traps-masked
