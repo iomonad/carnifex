@@ -20,12 +20,12 @@
              (nth 2 argv))))
     (when (or (< 1000 y)
               (< 1000 x))
-      (lambda ()
+      (progn
         (format t "Les dimensions ne doivent pas exceder une longeur de 1000~%")
         (sb-ext:exit :code 1)))
     (when (or (> 0 y)
               (> 0 x))
-      (lambda ()
+      (progn
         (format t "Les valeurs doivent etre positives~%")
         (sb-ext:exit :code 1)))
     (setq xi x)
@@ -44,7 +44,7 @@ optional arguments:
                              (string-equal "--help" arg))
                     return t)
               (not (< 2 (length *posix-argv*))))
-      (lambda ()
+      (progn
         (format t banner pname)
         (sb-ext:exit :code 1))))
   'continue)
@@ -119,6 +119,9 @@ optional arguments:
 
 (defun get-neighbor (i j)
   "Retrieve neighbors"
+  (when (EQUAL 1 *debug*)
+    (format t "Neighbor call i -> ~d - j -> ~d~%"
+            i j))
   (+ (is-nearby (+ i 1) j)
      (is-nearby (- i 1) j)
      (is-nearby i (+ j 1))
@@ -225,7 +228,7 @@ optional arguments:
 (defun zoom ()
   "Zoom in the global scope"
   (when (< tile_size 400)
-    (lambda()
+    (progn
       (setf tile_size (+ tile_size zoom_dec_speed))
       (setf move_x (- move_x 50))
       (setf move_y (- move_y 50)))))
@@ -233,7 +236,7 @@ optional arguments:
 (defun dezoom ()
   "Un-zoom the goba scope"
   (when (> tile_size zoom_dec_speed)
-    (lambda ()
+    (progn
       (setf tile_size (- tile_size zoom_dec_speed))
       (setf move_x (+ move_x 50))
       (setf move_y (+ move_y 50)))))
@@ -241,11 +244,11 @@ optional arguments:
 (defun manage-speed (arg)
   "Function helper to manage game speed"
   (if (eq arg T)
-      (lambda ()
+      (progn
         (if (>= speed_game 20)
             (setf speed_game
                   (- speed_game change_speed_game))))
-    (lambda ()
+    (progn
       (if (<= speed_game 100)
           (setf speed_game (+ speed_game
                               change_speed_game))))))
@@ -254,6 +257,7 @@ optional arguments:
 
 (defun keybind-callback-handler (key)
   "Handle keybinds with severals callbacks"
+  (format t " Key handled: ~s ~%" key)
   (if (sdl:key= key :sdl-key-escape)
       (sdl:push-quit-event))
   (if (or (sdl:key= key :sdl-key-left) (sdl:key= key :sdl-key-a))
@@ -276,9 +280,11 @@ optional arguments:
       (setq arr (make-array (list yi xi) :initial-element 0)))
   (if (or (sdl:key= key :sdl-key-p)
           (sdl:key= key :sdl-key-space))
-      (if (= pause 0)
-          (setf pause 1)
-        (setf pause 0)))
+      (progn
+        (if (= pause 0)
+            (setf pause 1)
+          (setf pause 0))
+        (format t "State: ~d~%" pause)))
   (print-sdl-board arr xi yi tile_size)) ; Recompute board
 
 ;; Mouse events
@@ -352,7 +358,7 @@ optional arguments:
                (manage-speed t) ; shifted
              (zoom)))
        (if (= button 1)
-           (lambda ()
+           (progn
              (setf last_x 0)
              (setf last_y 0))))
       (:key-down-event (:key key)
@@ -360,9 +366,9 @@ optional arguments:
       (:idle ()
         (mouse-callback-handler)
         (if (eq (eq pause 0) T)
-            (lambda ()
+            (progn
               (setf cur_time (get-internal-run-time))
-              (let* ((time_wait (- last_time
+              (let ((time_wait (- last_time
                                   (- cur_time speed_game))))
                 (if (> time_wait 0)
                     (sleep (/ time_wait
