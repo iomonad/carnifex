@@ -4,7 +4,7 @@
 <br>
 </p>
 
-# Carnifex
+# Carnifex [![HitCount](http://hits.dwyl.io/iomonad/carnifex.svg)](http://hits.dwyl.io/iomonad/carnifex)
 > Conway's Game of Life automaton written in Common Lisp using SDL for graphic rendering.
 ## Installation
 ### Requierements
