@@ -109,19 +109,15 @@ optional arguments:
 
 (defun is-nearby (i j)
   "Neighbors predicate"
-  (when (AND (> i -1)
+  (if (AND (> i -1)
              (< i yi)
              (> j -1)
              (< j xi))
-    (if (equal (get-current-cell i j) 1) 1
-      0)
-    0))
+    (if (equal (get-current-cell i j) 1) 1 0) 0))
 
 (defun get-neighbor (i j)
   "Retrieve neighbors"
-  (when (EQUAL 1 *debug*)
-    (format t "Neighbor call i -> ~d - j -> ~d~%"
-            i j))
+  (format t "Neighbor call i:~d - j:~d~%" i j)
   (+ (is-nearby (+ i 1) j)
      (is-nearby (- i 1) j)
      (is-nearby i (+ j 1))
@@ -133,6 +129,7 @@ optional arguments:
 
 (defun determine-neighbor ()
   "Calculate neighbors"
+  (format t "Value of yi:~d and xi:~d ~%" yi xi)
   (dotimes (i yi)
     (dotimes (j xi)
       (setf (aref next_generation i j)
