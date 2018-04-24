@@ -117,7 +117,9 @@ optional arguments:
 
 (defun get-neighbor (i j)
   "Retrieve neighbors"
-  (format t "Neighbor call i:~d - j:~d~%" i j)
+  (when (eq *debug* 1)
+    (format t "Neighbor call i:~d - j:~d~%"
+            i j))
   (+ (is-nearby (+ i 1) j)
      (is-nearby (- i 1) j)
      (is-nearby i (+ j 1))
@@ -129,7 +131,9 @@ optional arguments:
 
 (defun determine-neighbor ()
   "Calculate neighbors"
-  (format t "Value of yi:~d and xi:~d ~%" yi xi)
+  (when (eq *debug* 1)
+    (format t "Value of yi:~d and xi:~d ~%"
+            yi xi))
   (dotimes (i yi)
     (dotimes (j xi)
       (setf (aref next_generation i j)
@@ -254,7 +258,9 @@ optional arguments:
 
 (defun keybind-callback-handler (key)
   "Handle keybinds with severals callbacks"
-  (format t " Key handled: ~s ~%" key)
+  (when (eq *debug* 1)
+    (format t " Key handled: ~s ~%"
+            key))
   (if (sdl:key= key :sdl-key-escape)
       (sdl:push-quit-event))
   (if (or (sdl:key= key :sdl-key-left) (sdl:key= key :sdl-key-a))
@@ -281,7 +287,8 @@ optional arguments:
         (if (= pause 0)
             (setf pause 1)
           (setf pause 0))
-        (format t "State: ~d~%" pause)))
+        (when (eq *debug* 1)
+          (format t "State: ~d~%" pause))))
   (print-sdl-board arr xi yi tile_size)) ; Recompute board
 
 ;; Mouse events
