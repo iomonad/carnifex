@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="http://www.lisperati.com/casting-spels-emacs/images/lisp-is-different.jpg"/><br>
+  <img src="https://raw.githubusercontent.com/iomonad/carnifex/master/.github/conway.gif"/><br>
 <br>
 <br>
 </p>
