@@ -36,7 +36,11 @@ The concept was originally discovered in the 1940s by Stanislaw Ulam and John vo
 ### Missing features
 - The *hashlife* algorithm
 ## Commons patterns
-- todo
+### Oscillators:
+<p align="center">
+  <img src="https://raw.githubusercontent.com/iomonad/carnifex/master/.github/oscillator.gif"/><br>
+</p>
+
 ## Usage
 ```bash
 ./carnifex <dimx:int> <dimy:int> [-h --help -i --invert -t --traces -d --debug]
